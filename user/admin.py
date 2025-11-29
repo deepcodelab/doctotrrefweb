@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CustomUser, DoctorProfile, CustomerProfile, Specialization
+from .models import CustomUser, DoctorProfile, CustomerProfile, Specialization, DoctorAvailability
 
 
 # Register your models here.
@@ -15,3 +15,4 @@ admin.site.register(CustomUser, UserAdmin)
 admin.site.register(DoctorProfile)
 admin.site.register(CustomerProfile)
 admin.site.register(Specialization)
+admin.site.register(DoctorAvailability)

@@ -11,4 +11,6 @@ router.register(r"appointments", AppointmentViewSet, basename="appointment")
 
 urlpatterns = [
      path('', include(router.urls)),
+     path('homepage', HomePageViewSet.as_view(), name='homepage'),
+     path('doctor-homepage', DoctorHomePageViewSet.as_view(), name='doctor_homepage')
 ]

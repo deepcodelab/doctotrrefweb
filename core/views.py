@@ -1,11 +1,13 @@
 from django.shortcuts import render
 from .models import Appointment
 from user.models import *
-from .serializers import AppointmentSerializer
+from .serializers import AppointmentSerializer, HomePageSerializer, DoctorHomePageSerializer
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-# from rest_framework.status impor
+from rest_framework.views import APIView
+from rest_framework import status
+from django.utils import timezone
 
 class AppointmentViewSet(viewsets.ModelViewSet):
     serializer_class = AppointmentSerializer
@@ -82,4 +84,26 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         })
 
 
+class HomePageViewSet(APIView):
+    def get(self, request, *args, **kwargs):
+        print(request.user,'llllll')
+        if not request.user.is_authenticated:
+            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+        customer = CustomerProfile.objects.filter(user=request.user).first()
+        appointments = Appointment.objects.filter(customer=customer, appointment_date__gte=timezone.now())
+        serializer = HomePageSerializer(appointments, context={"request": request}, many=True)
+        print(serializer.data,'llll')
+        return Response({"data": serializer.data}, status=status.HTTP_200_OK)
+
         
+
+class DoctorHomePageViewSet(APIView):
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        print(user,';llll')
+        if not user.is_authenticated:
+            return Response({"error": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+        doctor = DoctorProfile.objects.filter(user=user).first()
+        serializer = DoctorHomePageSerializer(doctor, context={"request": request})
+        print(serializer.data,'llll')
+        return Response(serializer.data, status=status.HTTP_200_OK)

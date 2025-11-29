@@ -133,11 +133,11 @@ class DoctorProfileSerializer(serializers.ModelSerializer):
         request = self.context.get("request", None)
 
         # If no request, return relative URL safely
-        if not request:
-            if obj.profile_image:
-                print(";;;;;;;;", obj.profile_image.url)
-                return obj.profile_image.url
-            return None
+        # if not request:
+        #     if obj.profile_image:
+        #         print(";;;;;;;;", obj.profile_image.url)
+        #         return obj.profile_image.url
+        #     return None
 
         # If request exists, return absolute URL
         if obj.profile_image:
@@ -169,6 +169,7 @@ class DoctorProfileSerializer(serializers.ModelSerializer):
 class CustomerProfileSerializer(ModelSerializer):
     user_email = serializers.EmailField(source='user.email', read_only=True)
     user_name = serializers.CharField(source='user.name', read_only=True)
+    # image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomerProfile
@@ -184,4 +185,17 @@ class CustomerProfileSerializer(ModelSerializer):
             'blood_group',
             'emergency_contact',
             'profile_picture',
+            # 'image_url',
         ]
+
+    # def get_image_url(self, obj):
+    #     req = self.context["request"]
+    #     if req.user.role == "customer":
+    #         if obj.profile_picture:
+    #             return req.build_absolute_uri(obj.profile_picture.url)
+    #         return None
+
+    #     if req.user.role == "doctor":
+    #         if obj.profile_image:
+    #             return req.build_absolute_uri(obj.profile_image.url)
+    #         return None

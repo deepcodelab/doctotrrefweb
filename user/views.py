@@ -172,10 +172,11 @@ class ProfileViewSet(ModelViewSet):
         user_data = UserSerializers(user).data
         if user.role == "doctor":
             profile = DoctorProfile.objects.filter(user=user).first()
-            profile_data = DoctorProfileSerializer(profile).data if profile else None
+            profile_data = DoctorProfileSerializer(profile, context={"request": request}).data if profile else None
         elif user.role == "customer":
             profile = CustomerProfile.objects.filter(user=user).first()
-            profile_data = CustomerProfileSerializer(profile).data if profile else None
+            profile_data = CustomerProfileSerializer(profile, context={"request": request}).data if profile else None
+            print(profile_data)
         else:
             profile_data = None
 
@@ -209,7 +210,6 @@ class DoctorAvailibilityViewSet(ModelViewSet):
 class DoctorRecomandedAPIView(APIView):
 
     def get(self, request, id):
-        print(id,"lllll")
         doctor, specialization = get_doctor_specialization(id)
 
         if not doctor:
@@ -221,5 +221,5 @@ class DoctorRecomandedAPIView(APIView):
         similar = get_similar_doctors(specialization, doctor.id)
 
         return Response({
-            "recommended": DoctorProfileSerializer(similar, many=True).data
+            "recommended": DoctorProfileSerializer(similar, context={"request": request}, many=True).data
         })

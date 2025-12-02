@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import CustomUser, DoctorProfile, CustomerProfile,DoctorAvailability
+from .models import CustomUser, DoctorProfile, CustomerProfile,DoctorAvailability, DoctorDateAvailability
 
 
 # -------------------- JWT Token Serializer --------------------
@@ -72,8 +72,8 @@ class UserSerializers(ModelSerializer):
 
 class DoctorAvailabilitySerializer(serializers.ModelSerializer):
     class Meta:
-        model = DoctorAvailability
-        fields = ['id','day', 'start_time', 'end_time']
+        model = DoctorDateAvailability
+        fields = ['id','date', 'start_time', 'end_time']
         # read_only_fields =["doctor"]
 
     def create(self, validated_data):
@@ -101,7 +101,7 @@ class DoctorAvailabilitySerializer(serializers.ModelSerializer):
 class DoctorProfileSerializer(serializers.ModelSerializer):
     user_email = serializers.EmailField(source='user.email', read_only=True)
     user_name = serializers.CharField(source='user.name', read_only=True)
-    availabilities = DoctorAvailabilitySerializer(many=True, read_only=True)
+    date_availabilities = DoctorAvailabilitySerializer(many=True, read_only=True)
     specialization = serializers.SerializerMethodField()
     image_url = serializers.SerializerMethodField()
 
@@ -120,7 +120,7 @@ class DoctorProfileSerializer(serializers.ModelSerializer):
             'consultation_fee',
             "image_url",
             'rating',
-            'availabilities',
+            'date_availabilities',
         ]
 
     def get_specialization(self, obj):
@@ -152,9 +152,9 @@ class DoctorProfileSerializer(serializers.ModelSerializer):
 
         # Update or create availabilities
         for availability in availabilities_data:
-            DoctorAvailability.objects.update_or_create(
+            DoctorDateAvailability.objects.update_or_create(
                 doctor=instance,
-                day=availability.get('day'),
+                date=availability.get('date'),
                 defaults={
                     'start_time': availability.get('start_time'),
                     'end_time': availability.get('end_time'),

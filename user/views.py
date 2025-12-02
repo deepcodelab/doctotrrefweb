@@ -187,24 +187,24 @@ class ProfileViewSet(ModelViewSet):
         })
 
 
-class DoctorAvailibilityViewSet(ModelViewSet):
-    queryset = DoctorAvailability.objects.all()
-    serializer_class = DoctorAvailabilitySerializer
-    permission_classes = [IsAuthenticated]
+# class DoctorAvailibilityViewSet(ModelViewSet):
+#     queryset = DoctorAvailability.objects.all()
+#     serializer_class = DoctorAvailabilitySerializer
+#     permission_classes = [IsAuthenticated]
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            availability = serializer.save()  # 👈 automatically adds doctor (handled in serializer)
-            return Response({
-                "message": "Slot added successfully",
-                "data": DoctorAvailabilitySerializer(availability).data
-            }, status=status.HTTP_201_CREATED)
+#     def create(self, request, *args, **kwargs):
+#         serializer = self.get_serializer(data=request.data, context={'request': request})
+#         if serializer.is_valid():
+#             availability = serializer.save()  # 👈 automatically adds doctor (handled in serializer)
+#             return Response({
+#                 "message": "Slot added successfully",
+#                 "data": DoctorAvailabilitySerializer(availability).data
+#             }, status=status.HTTP_201_CREATED)
 
-        return Response({
-            "message": "Something went wrong",
-            "errors": serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
+#         return Response({
+#             "message": "Something went wrong",
+#             "errors": serializer.errors
+#         }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DoctorRecomandedAPIView(APIView):
@@ -223,3 +223,24 @@ class DoctorRecomandedAPIView(APIView):
         return Response({
             "recommended": DoctorProfileSerializer(similar, context={"request": request}, many=True).data
         })
+
+
+
+class DoctorAvailibilityViewSet(ModelViewSet):
+    queryset = DoctorAvailability.objects.all()
+    serializer_class = DoctorAvailabilitySerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            availability = serializer.save()  # 👈 automatically adds doctor (handled in serializer)
+            return Response({
+                "message": "Slot added successfully",
+                "data": DoctorAvailabilitySerializer(availability).data
+            }, status=status.HTTP_201_CREATED)
+
+        return Response({
+            "message": "Something went wrong",
+            "errors": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)

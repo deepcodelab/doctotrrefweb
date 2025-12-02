@@ -83,6 +83,26 @@ class DoctorAvailability(models.Model):
         return f"{self.doctor} - {self.day} ({self.start_time} to {self.end_time})"
 
 
+class DoctorDateAvailability(models.Model):
+    doctor = models.ForeignKey(
+        "DoctorProfile",
+        on_delete=models.CASCADE,
+        related_name="date_availabilities"
+    )
+    date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    slot_duration = models.PositiveIntegerField(default=30)  # in minutes
+
+    class Meta:
+        ordering = ["doctor", "date", "start_time"]
+        unique_together = ("doctor", "date", "start_time", "end_time")
+
+    def __str__(self):
+        return f"{self.doctor} - {self.date} ({self.start_time} to {self.end_time})"
+
+
+
 class Specialization(models.Model):
     name = models.CharField(max_length=100, unique=True)
 

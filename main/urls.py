@@ -25,6 +25,7 @@ urlpatterns = [
     path('api/', include("user.urls")),
     path('api/', include("core.urls")),
     path("api/", include("chatbot.urls")),
+    path('api/', include("live_stream.urls")),
 ]
 
 if settings.DEBUG:

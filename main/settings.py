@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'user',
     'core',
     "chatbot",
+    "channels",
+    "live_stream",
 ]
 
 MIDDLEWARE = [
@@ -87,8 +89,19 @@ TEMPLATES = [
         },
     },
 ]
+ASGI_APPLICATION = "main.asgi.application"
 
 WSGI_APPLICATION = "main.wsgi.application"
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 
 # Database

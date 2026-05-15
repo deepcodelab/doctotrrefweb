@@ -79,6 +79,7 @@ class HomePageSerializer(serializers.ModelSerializer):
     def get_image(self, obj):
         request = self.context["request"]
         if obj.doctor.profile_image:
+            print("2222")
             return request.build_absolute_uri(obj.doctor.profile_image.url)
         return None
 
@@ -114,6 +115,7 @@ class DoctorAppointmentSerializer(serializers.ModelSerializer):
     def get_doctor_image(self, obj):
         request = self.context["request"]
         if obj.doctor.profile_image:
+            print("111")
             return request.build_absolute_uri(obj.doctor.profile_image.url)
         return None
 
@@ -131,6 +133,7 @@ class DoctorHomePageSerializer(serializers.ModelSerializer):
     def get_doctor_image(self, obj):
         request = self.context["request"]
         if obj.profile_image:
+            print(obj.profile_image,"lllllcccc")
             return request.build_absolute_uri(obj.profile_image.url)
         return None
 

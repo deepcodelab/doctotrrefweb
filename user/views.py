@@ -83,6 +83,7 @@ class UserViewSet(ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         doctor = self.get_object()
+        print("kkkkkmmmmmm")
         serializer = self.serializer_class(doctor)
         return Response({
             "success": True,
@@ -157,10 +158,10 @@ class ProfileViewSet(ModelViewSet):
             if user.role == "doctor":
                 print(request.data,'llll')
                 profile = DoctorProfile.objects.filter(user=user).first()
-                serializer = DoctorProfileSerializer(profile, data=request.data, partial=True)
+                serializer = DoctorProfileSerializer(profile, data=request.data, partial=True, context={"request": request})
             elif user.role == "customer":
                 profile = CustomerProfile.objects.filter(user=user).first()
-                serializer = CustomerProfileSerializer(profile, data=request.data, partial=True)
+                serializer = CustomerProfileSerializer(profile, data=request.data, partial=True, context={"request": request})
             else:
                 return Response({"detail": "Admin cannot update profile."}, status=400)
 

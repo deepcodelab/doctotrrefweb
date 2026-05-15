@@ -141,7 +141,7 @@ class DoctorProfileSerializer(serializers.ModelSerializer):
 
         # If request exists, return absolute URL
         if obj.profile_image:
-            print("kkkk", )
+            print("kkkk", obj.profile_image.url)
             return request.build_absolute_uri(obj.profile_image.url)
 
         return None

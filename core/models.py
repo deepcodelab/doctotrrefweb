@@ -26,3 +26,14 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"{self.customer.user.name or self.customer.user.email} -> {self.doctor.user.name or self.doctor.user.email} on {self.appointment_date}"
+
+
+
+class Review(models.Model):
+    user_id = models.ForeignKey(CustomerProfile, on_delete=models.CASCADE, related_name="customer_review")
+    doctor_id = models.ForeignKey(DoctorProfile, on_delete=models.CASCADE, related_name="doctor_review")
+    rating = models.IntegerField(default=0)
+    comment = models.TextField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.customer.user.name or self.customer.user.email} -> {self.doctor.user.name or self.doctor.user.email}"

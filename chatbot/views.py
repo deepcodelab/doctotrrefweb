@@ -9,33 +9,33 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
 
-CHATBOT_SERVICE_URL = "http://localhost:8001/api/v1/respond"
+# CHATBOT_SERVICE_URL = "http://localhost:8001/api/v1/respond"
 
-class GlobalChatbotView(APIView):
+# class GlobalChatbotView(APIView):
 
-    def post(self, request):
-        user_message = request.data.get("message")
-        history = request.data.get("history")
-        print(history,"llll")
+#     def post(self, request):
+#         user_message = request.data.get("message")
+#         history = request.data.get("history")
+#         print(history,"llll")
 
-        if not user_message:
-            return Response({"error": "Message is required"}, status=400)
+#         if not user_message:
+#             return Response({"error": "Message is required"}, status=400)
 
-        try:
-            # Forward to microservice
-            with httpx.Client(timeout=120.0) as client:
-                res = client.post(
-                    CHATBOT_SERVICE_URL,
-                    json={"message": user_message, "history":history}
-                )
+#         try:
+#             # Forward to microservice
+#             with httpx.Client(timeout=120.0) as client:
+#                 res = client.post(
+#                     CHATBOT_SERVICE_URL,
+#                     json={"message": user_message, "history":history}
+#                 )
 
-            return Response(res.json(), status=res.status_code)
+#             return Response(res.json(), status=res.status_code)
 
-        except httpx.RequestError:
-            return Response(
-                {"error": "Chatbot Service is unreachable"},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE
-            )
+#         except httpx.RequestError:
+#             return Response(
+#                 {"error": "Chatbot Service is unreachable"},
+#                 status=status.HTTP_503_SERVICE_UNAVAILABLE
+#             )
 
 class SearchDoctors(APIView):
     

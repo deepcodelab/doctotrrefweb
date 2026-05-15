@@ -155,6 +155,7 @@ class ProfileViewSet(ModelViewSet):
         # PATCH (update)
         if request.method == 'PATCH':
             if user.role == "doctor":
+                print(request.data,'llll')
                 profile = DoctorProfile.objects.filter(user=user).first()
                 serializer = DoctorProfileSerializer(profile, data=request.data, partial=True)
             elif user.role == "customer":

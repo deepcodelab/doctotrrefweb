@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Appointment
+from .models import Appointment, Review
 from user.models import DoctorProfile, CustomerProfile
 
 class AppointmentSerializer(serializers.ModelSerializer):
@@ -122,7 +122,7 @@ class DoctorHomePageSerializer(serializers.ModelSerializer):
     name = serializers.CharField(source="user.name", read_only=True)
     appointments = serializers.SerializerMethodField()
     doctor_image = serializers.SerializerMethodField()
-    specialization = serializers.CharField(source="specialization.name")
+    specialization = serializers.SerializerMethodField()
 
     class Meta:
         model = DoctorProfile
@@ -141,3 +141,18 @@ class DoctorHomePageSerializer(serializers.ModelSerializer):
             appointment_data=DoctorAppointmentSerializer(appointments, context={"request": request}, many=True)
             return appointment_data.data
         return None
+
+    def get_specialization(self, obj):
+        return obj.specialization.name if obj.specialization else None
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    customer_name = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Review
+        fields = "__all__"
+
+    def get_customer_name(self, obj):
+        customer_name = CustomerProfile.objects.filter(id=obj.user_id.id).first()
+        return customer_name.user.name

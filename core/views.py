@@ -1,7 +1,7 @@
 from django.shortcuts import render
-from .models import Appointment
+from .models import Appointment, Review
 from user.models import *
-from .serializers import AppointmentSerializer, HomePageSerializer, DoctorHomePageSerializer
+from .serializers import AppointmentSerializer, HomePageSerializer, DoctorHomePageSerializer, ReviewSerializer
 from rest_framework import viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -107,3 +107,45 @@ class DoctorHomePageViewSet(APIView):
         serializer = DoctorHomePageSerializer(doctor, context={"request": request})
         print(serializer.data,'llll')
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class ReviewViewSet(viewsets.ModelViewSet):                                                                                                         
+      serializer_class = ReviewSerializer                                                                                                             
+      queryset = Review.objects.all()
+      
+      def list(self, request, *args, **kwargs):                                                                                                           
+        doctor = DoctorProfile.objects.filter(user=request.user).first()                                                                                
+                                                                                                                                                        
+        if not doctor:                                                                                                                                  
+            return Response({                                                                                                                           
+                'error': 'Doctor profile not found'                                                                                                     
+            }, status=status.HTTP_404_NOT_FOUND)                                                                                                        
+                                                                                                                                                        
+        reviews = Review.objects.filter(doctor_id=doctor)                                                                                               
+        serializer = self.get_serializer(reviews, many=True)                                                                                            
+        return Response({                                                                                                                               
+            'message': 'Reviews fetched successfully',                                                                                                  
+            'data': serializer.data                                                                                                                     
+        }, status=status.HTTP_200_OK)                                                                                                                
+                                                                                                                                                      
+      def create(self, request, *args, **kwargs):
+        data = request.data                                                                                                                         
+        print(data)
+        doctor = DoctorProfile.objects.get(id=data['doctor_id'])                                                                                
+        customer = CustomerProfile.objects.get(user=request.user)                                                                               
+                                                                                                                        
+        serializer = self.get_serializer(data={                                                                                                 
+        'user_id': customer.id,                                                                                                             
+        'doctor_id': doctor.id,                                                                                                             
+        'rating': data.get('rating', 0),                                                                                                    
+        'comment': data.get('comment', None)                                                                                                
+        })
+        print("Serializer data:", serializer.initial_data) 
+        if serializer.is_valid():
+            serializer.save()                                                                                                                               
+            return Response({                                                                                                                               
+            'message': 'Review submitted successfully',                                                                                                 
+            'data': serializer.data                                                                                                                     
+            }, status=status.HTTP_201_CREATED)
+        print("Serializer errors:", serializer.errors)                                                                                  
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)                                                                  
+            

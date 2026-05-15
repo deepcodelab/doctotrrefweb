@@ -6,6 +6,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 router = routers.DefaultRouter()
 
 router.register(r"appointments", AppointmentViewSet, basename="appointment")
+router.register(r"reviews", ReviewViewSet, basename="review")
 
 
 

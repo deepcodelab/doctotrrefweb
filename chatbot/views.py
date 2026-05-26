@@ -10,7 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import AllowAny
 
 
-CHATBOT_SERVICE_URL = "http://localhost:8001/api/v1/respond"
+# CHATBOT_SERVICE_URL = "http://localhost:8001/api/v1/respond"
+CHATBOT_SERVICE_URL = "https://medical-assistent-9fp7.onrender.com/api/v1/respond"
 
 class GlobalChatbotView(APIView):
 

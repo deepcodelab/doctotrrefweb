@@ -3,39 +3,56 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import JsonResponse
 from rest_framework import status
-from user.models import DoctorProfile, DoctorAvailability, CustomUser
+from user.models import DoctorProfile, DoctorAvailability, CustomUser, Specialization
 from core.models import Appointment
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.permissions import AllowAny
 
 
-# CHATBOT_SERVICE_URL = "http://localhost:8001/api/v1/respond"
+CHATBOT_SERVICE_URL = "http://localhost:8001/api/v1/respond"
 
-# class GlobalChatbotView(APIView):
+class GlobalChatbotView(APIView):
 
-#     def post(self, request):
-#         user_message = request.data.get("message")
-#         history = request.data.get("history")
-#         print(history,"llll")
+    def post(self, request):
+        user_message = request.data.get("message")
+        history = request.data.get("history")
 
-#         if not user_message:
-#             return Response({"error": "Message is required"}, status=400)
+        if not user_message:
+            return Response({"error": "Message is required"}, status=400)
 
-#         try:
-#             # Forward to microservice
-#             with httpx.Client(timeout=120.0) as client:
-#                 res = client.post(
-#                     CHATBOT_SERVICE_URL,
-#                     json={"message": user_message, "history":history}
-#                 )
+        try:
+            # Forward to microservice
+            # with httpx.Client(timeout=120.0) as client:
+            #     res = client.post(
+            #         CHATBOT_SERVICE_URL,
+            #         json={"message": user_message, "history":history}
+            #     )
+            # print(res,"vvvvv")
 
-#             return Response(res.json(), status=res.status_code)
+            auth_header = request.headers.get("Authorization")
+            print(auth_header,"lljhh")
 
-#         except httpx.RequestError:
-#             return Response(
-#                 {"error": "Chatbot Service is unreachable"},
-#                 status=status.HTTP_503_SERVICE_UNAVAILABLE
-#             )
+            with httpx.Client(timeout=120.0) as client:
+                res = client.post(
+                    CHATBOT_SERVICE_URL,
+                    json={
+                        "message": user_message,
+                        "history": history
+                    },
+                    headers={
+                        "Authorization": auth_header
+                    }
+                )
+
+
+            return Response(res.json(), status=res.status_code)
+
+        except httpx.RequestError:
+            return Response(
+                {"error": "Chatbot Service is unreachable"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
 
 class SearchDoctors(APIView):
     
@@ -132,3 +149,59 @@ class BookAppointment(APIView):
             "time": time,
             "status": "booked"
         })
+
+
+class SearchDoctorsAPI(APIView):
+
+    def get(self, request):
+        print("--------------------------------------------------------")
+        specialty = request.GET.get("specialty")
+        city = request.GET.get("city")
+        # Validation
+        if not specialty:
+            return JsonResponse({"error": ("specialty is required")},status=400)
+
+        if not city:
+            return JsonResponse({"error": ("city is required")},status=400)
+
+        doctors = (DoctorProfile.objects.filter(specialization__name__iexact=specialty,city__iexact=city).select_related("user","specialization")[:10])
+        data = []
+
+        for d in doctors:
+            data.append({
+                "id": d.id,
+                "name": d.user.name or d.user.email,
+                "specialty": d.specialization.name,
+                "experience": d.experience_years,
+                "certificate": d.certifications,
+                "clinic_name": d.clinic_name,
+                "address": d.clinic_address,
+                "language": d.languages_spoken,
+            })
+        
+
+        return JsonResponse(
+            {
+                "count": len(data),
+                "doctors": data
+            }
+        )
+
+
+class SpecializationAPIView(APIView):
+    def get(self, request):
+        spec = Specialization.objects.all()
+        data = []
+        for s in spec:
+            data.append(
+                {
+            "name": s.name
+        }
+            )
+
+        return JsonResponse(
+            {
+                "count" : len(data),
+                "specialization":  data
+            }
+        )

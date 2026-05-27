@@ -10,8 +10,8 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import AllowAny
 
 
-# CHATBOT_SERVICE_URL = "http://localhost:8001/api/v1/respond"
-CHATBOT_SERVICE_URL = "https://doctorchatbot.onrender.com/api/v1/respond"
+CHATBOT_SERVICE_URL = "http://localhost:8001/api/v1/respond"
+# CHATBOT_SERVICE_URL = "https://doctorchatbot.onrender.com/api/v1/respond"
 
 class GlobalChatbotView(APIView):
 
@@ -23,16 +23,7 @@ class GlobalChatbotView(APIView):
             return Response({"error": "Message is required"}, status=400)
 
         try:
-            # Forward to microservice
-            # with httpx.Client(timeout=120.0) as client:
-            #     res = client.post(
-            #         CHATBOT_SERVICE_URL,
-            #         json={"message": user_message, "history":history}
-            #     )
-            # print(res,"vvvvv")
-
             auth_header = request.headers.get("Authorization")
-            print(auth_header,"lljhh")
 
             with httpx.Client(timeout=120.0) as client:
                 res = client.post(
@@ -206,3 +197,4 @@ class SpecializationAPIView(APIView):
                 "specialization":  data
             }
         )
+        

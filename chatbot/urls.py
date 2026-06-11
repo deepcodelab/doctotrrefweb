@@ -8,4 +8,5 @@ urlpatterns = [
     path("appointments/book/", BookAppointment.as_view()),
     path("chat_doctors/bot_search/", SearchDoctorsAPI.as_view()),
     path("speclization_list/", SpecializationAPIView.as_view()),
+    path("book_appointment/", ChatbotAppointment.as_view()),
 ]

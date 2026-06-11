@@ -229,14 +229,14 @@ class DoctorRecomandedAPIView(APIView):
 
 
 class DoctorAvailibilityViewSet(ModelViewSet):
-    queryset = DoctorAvailability.objects.all()
+    queryset = DoctorDateAvailability.objects.all()
     serializer_class = DoctorAvailabilitySerializer
     permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            availability = serializer.save()  # 👈 automatically adds doctor (handled in serializer)
+            availability = serializer.save()
             return Response({
                 "message": "Slot added successfully",
                 "data": DoctorAvailabilitySerializer(availability).data
@@ -246,3 +246,22 @@ class DoctorAvailibilityViewSet(ModelViewSet):
             "message": "Something went wrong",
             "errors": serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DoctorAvailabilityChatbotViewSet(APIView):
+    def get(self, request, doctor_id):
+        doctor = DoctorProfile.objects.filter(id=doctor_id).first()
+        doctor_date = DoctorDateAvailability.objects.all()
+        print("mmmm", doctor_date)
+
+        if not doctor_date:
+            return Response(
+                {"error": "Doctor date not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        return Response({
+            "doctor_data": DoctorAvailabilitySerializer(doctor_date, many=True).data
+        })
+    
+        

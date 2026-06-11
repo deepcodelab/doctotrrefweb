@@ -175,3 +175,7 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,                   # gives new refresh token on each refresh
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+
+GOOGLE_CLIENT_ID = "349715931754-hib9f9k61phbngdh7hqki572mqff9sp0.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET = "http://localhost:8000/google/callback/"

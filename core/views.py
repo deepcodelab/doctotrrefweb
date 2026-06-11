@@ -16,24 +16,17 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
 
-        # If the user is a doctor → show appointments for them
-        # if hasattr(user, "doctor_profile"):
         if user.role == "doctor":
-            print("bbbbb")
             return Appointment.objects.filter(doctor__user=user).order_by("-created_at")
 
-        # If the user is a customer → show their own appointments
-        # elif hasattr(user, "customer_profile"):
+
         elif user.role == 'customer':
-            print("hhhhhkkk")
             return Appointment.objects.filter(customer__user=user).order_by("-created_at")
 
         return Appointment.objects.none()
 
     def list(self, request, *args, **kwargs):
-        print("llllll")
         queryset = self.get_queryset()
-        print(queryset,"hhhh")
         serializer = self.serializer_class(queryset, many=True, context={"request": request})
 
         return Response({
@@ -44,10 +37,11 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
 
     def create(self, request, *args, **kwargs):
+        print(request.data)
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
             print(serializer.errors)  # 👈 add this line
-            return Response(serializer.errors, status=400)
+            return Response(serializer.errors, status=400) 
         self.perform_create(serializer)
         return Response(serializer.data, status=201)
 
@@ -57,7 +51,6 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     
     def partial_update(self, request, *args, **kwargs):
         appointment = self.get_object()
-        print("jjjjfjfjjffjjjffjfj")
         new_status = request.data.get("status")
 
         if new_status not in ["pending", "confirmed", "completed", "cancelled"]:

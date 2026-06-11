@@ -3,15 +3,15 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import JsonResponse
 from rest_framework import status
-from user.models import DoctorProfile, DoctorAvailability, CustomUser, Specialization
+from user.models import DoctorProfile, DoctorAvailability, CustomUser, Specialization, CustomerProfile
 from core.models import Appointment
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import AllowAny
 
 
-CHATBOT_SERVICE_URL = "http://localhost:8001/api/v1/respond"
-# CHATBOT_SERVICE_URL = "https://doctorchatbot.onrender.com/api/v1/respond"
+# CHATBOT_SERVICE_URL = "http://localhost:8001/api/v1/respond"
+CHATBOT_SERVICE_URL = "https://doctorchatbot.onrender.com/api/v1/respond"
 
 class GlobalChatbotView(APIView):
 
@@ -170,7 +170,6 @@ class SearchDoctorsAPI(APIView):
                 "address": d.clinic_address,
                 "language": d.languages_spoken,
             })
-        
 
         return JsonResponse(
             {
@@ -197,4 +196,21 @@ class SpecializationAPIView(APIView):
                 "specialization":  data
             }
         )
-        
+
+
+class ChatbotAppointment(APIView):
+    def post(self,request, *args, **kwargs):
+        user = request.user
+        doctor_id = request.data.get("doctor")
+        appointment_date = request.data.get("appointment_date")
+        appointment_time = request.data.get("appointment_time")
+        print(request.data, "data")
+
+        doctor = DoctorProfile.objects.filter(id=doctor_id).first()
+        customer = CustomerProfile.objects.filter(user=user).first()
+
+        appointment = Appointment.objects.create(doctor=doctor, customer=customer, appointment_date = appointment_date, appointment_time=appointment_time)
+
+        return JsonResponse({
+            "status" : status.HTTP_201_CREATED
+        })

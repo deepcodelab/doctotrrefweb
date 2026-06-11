@@ -80,12 +80,10 @@ class DoctorAvailabilitySerializer(serializers.ModelSerializer):
         """
         Automatically attach the doctor from request context.
         """
-        print(validated_data,"llll")
         request = self.context.get('request')
         doctor = None
 
         if request and hasattr(request, 'user'):
-            print("kkkkkk")
             doctor = DoctorProfile.objects.filter(user=request.user).first()
 
         if not doctor:
@@ -93,7 +91,6 @@ class DoctorAvailabilitySerializer(serializers.ModelSerializer):
 
         # ✅ Attach doctor before saving
         validated_data['doctor'] = doctor
-        print(validated_data, "lllll")  # for debugging
 
         return super().create(validated_data)
 

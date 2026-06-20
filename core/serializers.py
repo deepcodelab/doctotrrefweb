@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Appointment, Review
 from user.models import DoctorProfile, CustomerProfile
+import requests
 
 class AppointmentSerializer(serializers.ModelSerializer):
     doctor_name = serializers.CharField(source="doctor.user.name", read_only=True)
@@ -33,6 +34,8 @@ class AppointmentSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context["request"]
         user = request.user
+        print(validated_data,"data")
+        data = validated_data
 
         # Ensure customer exists
         customer_profile = CustomerProfile.objects.filter(user=user).first()
@@ -49,6 +52,44 @@ class AppointmentSerializer(serializers.ModelSerializer):
             customer=customer_profile,
             **validated_data,
         )
+        from datetime import datetime, timedelta
+
+        appointment_date = data["appointment_date"]
+        appointment_time = data["appointment_time"]
+
+        start_dt = datetime.combine(
+            appointment_date,
+            appointment_time
+        )
+
+        end_dt = start_dt + timedelta(minutes=30)  # or your appointment duration
+
+        event = {
+            "summary": f"Appointment with {data['doctor']}",
+            "description": data.get("notes", ""),
+            "start": {
+                "dateTime": start_dt.isoformat(),
+                "timeZone": "Asia/Kolkata",
+            },
+            "end": {
+                "dateTime": end_dt.isoformat(),
+                "timeZone": "Asia/Kolkata",
+            },
+        }
+
+        if customer_profile.google_calendar_connected:
+
+            response = requests.post(
+                "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+                headers={
+                    "Authorization": f"Bearer {customer_profile.google_access_token}",
+                    "Content-Type": "application/json"
+                },
+                json=event
+            )
+            print(response.status_code)
+            print(response.text)
+
         return appointment
 
 

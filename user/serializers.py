@@ -118,6 +118,7 @@ class DoctorProfileSerializer(serializers.ModelSerializer):
             "image_url",
             'rating',
             'date_availabilities',
+            'google_calendar_connected',
         ]
 
     def get_specialization(self, obj):
@@ -182,6 +183,7 @@ class CustomerProfileSerializer(ModelSerializer):
             'blood_group',
             'emergency_contact',
             'profile_picture',
+            'google_calendar_connected',
             # 'image_url',
         ]
 

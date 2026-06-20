@@ -15,18 +15,27 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        doctor_id = self.request.query_params.get("doctor")
+        date = self.request.query_params.get("date")
+
+        # When fetching booked slots for a specific doctor/date (e.g. from BookModal)
+        if doctor_id and date:
+            return Appointment.objects.filter(
+                doctor__id=doctor_id,
+                appointment_date=date,
+            ).order_by("appointment_time")
 
         if user.role == "doctor":
             return Appointment.objects.filter(doctor__user=user).order_by("-created_at")
 
-
-        elif user.role == 'customer':
+        elif user.role == "customer":
             return Appointment.objects.filter(customer__user=user).order_by("-created_at")
 
         return Appointment.objects.none()
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
+        print("mmm", queryset)
         serializer = self.serializer_class(queryset, many=True, context={"request": request})
 
         return Response({

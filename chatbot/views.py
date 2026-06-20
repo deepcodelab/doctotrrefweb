@@ -1,17 +1,18 @@
 import httpx
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from rest_framework import status
 from user.models import DoctorProfile, DoctorAvailability, CustomUser, Specialization, CustomerProfile
 from core.models import Appointment
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import AllowAny
+from google_auth_oauthlib.flow import Flow
 
 
-# CHATBOT_SERVICE_URL = "http://localhost:8001/api/v1/respond"
-CHATBOT_SERVICE_URL = "https://doctorchatbot.onrender.com/api/v1/respond"
+CHATBOT_SERVICE_URL = "http://localhost:8001/api/v1/respond"
+# CHATBOT_SERVICE_URL = "https://doctorchatbot.onrender.com/api/v1/respond"
 
 class GlobalChatbotView(APIView):
 
@@ -214,3 +215,92 @@ class ChatbotAppointment(APIView):
         return JsonResponse({
             "status" : status.HTTP_201_CREATED
         })
+
+
+from django.conf import settings
+from django.core.cache import cache
+from django.shortcuts import redirect as django_redirect
+from rest_framework_simplejwt.tokens import AccessToken as JWTAccessToken
+import os
+
+NGROK_URL = "https://9157-2409-40d1-db-1881-c1e8-a31c-4ba2-15ac.ngrok-free.app"
+FRONTEND_URL = "http://localhost:5173"
+
+
+def google_calendar_connect(request):
+    # Decode JWT to get user id (plain Django view, not DRF)
+    auth_header = request.headers.get("Authorization", "")
+    try:
+        token_str = auth_header.split(" ")[1]
+        token = JWTAccessToken(token_str)
+        user_id = token["user_id"]
+    except Exception:
+        return JsonResponse({"error": "Unauthorized"}, status=401)
+
+    flow = Flow.from_client_secrets_file(
+        os.path.join(settings.BASE_DIR, "client_secret.json"),
+        scopes=["https://www.googleapis.com/auth/calendar"],
+        redirect_uri=f"{NGROK_URL}/google/callback/"
+    )
+
+    auth_url, state = flow.authorization_url(
+        access_type="offline",
+        include_granted_scopes="true",
+        prompt="select_account consent",
+    )
+
+    # Store code_verifier + user_id in cache (5 min TTL)
+    cache.set(f"google_oauth_{state}", {
+        "code_verifier": flow.code_verifier,
+        "user_id": user_id,
+    }, timeout=300)
+
+    return JsonResponse({"auth_url": auth_url})
+
+
+def google_callback(request):
+    state = request.GET.get("state")
+    cached = cache.get(f"google_oauth_{state}")
+
+    if not cached:
+        return HttpResponse("OAuth session expired. Please try again.", status=400)
+
+    flow = Flow.from_client_secrets_file(
+        os.path.join(settings.BASE_DIR, "client_secret.json"),
+        scopes=["https://www.googleapis.com/auth/calendar"],
+        state=state,
+        redirect_uri=f"{NGROK_URL}/google/callback/"
+    )
+    flow.code_verifier = cached["code_verifier"]
+
+    flow.fetch_token(authorization_response=request.build_absolute_uri())
+
+    credentials = flow.credentials
+    cache.delete(f"google_oauth_{state}")
+
+    print("=== GOOGLE CALLBACK ===")
+    print("Refresh Token:", credentials.token)
+
+    user_id = cached["user_id"]
+    user = CustomUser.objects.filter(id=user_id).first()
+    print("User:", user, "| Role:", user.role if user else None)
+
+    if user:
+        if user.role == "doctor":
+            rows = DoctorProfile.objects.filter(user=user).update(
+                google_calendar_connected=True,
+                google_refresh_token=credentials.refresh_token,
+                google_access_token=credentials.token
+            )
+            print("Doctor rows updated:", rows)
+        elif user.role == "customer":
+            rows = CustomerProfile.objects.filter(user=user).update(
+                google_calendar_connected=True,
+                google_refresh_token=credentials.refresh_token,
+                google_access_token=credentials.token
+            )
+            print("Customer rows updated:", rows)
+    else:
+        print("ERROR: no user found for id", user_id)
+
+    return django_redirect(f"{FRONTEND_URL}/dashboard?google_calendar=connected")

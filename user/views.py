@@ -83,8 +83,7 @@ class UserViewSet(ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         doctor = self.get_object()
-        print("kkkkkmmmmmm")
-        serializer = self.serializer_class(doctor)
+        serializer = self.serializer_class(doctor, context={"request": request})
         return Response({
             "success": True,
             "data": serializer.data

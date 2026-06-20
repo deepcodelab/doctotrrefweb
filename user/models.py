@@ -131,6 +131,9 @@ class DoctorProfile(models.Model):
     popularity_score = models.FloatField(default=0.0)
     profile_image = models.ImageField(upload_to="doctor_profiles/", null=True, blank=True)
     slug = models.SlugField(unique=True, blank=True)
+    google_calendar_connected = models.BooleanField(default=False)
+    google_refresh_token = models.TextField(null=True, blank=True)
+    google_access_token = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"Dr. {self.user.name or self.user.email}"
@@ -161,6 +164,9 @@ class CustomerProfile(models.Model):
     blood_group = models.CharField(max_length=10, null=True, blank=True)
     emergency_contact = models.CharField(max_length=15, null=True, blank=True)
     profile_picture = models.ImageField(upload_to="profiles/", null=True, blank=True)
+    google_calendar_connected = models.BooleanField(default=False)
+    google_refresh_token = models.TextField(null=True, blank=True)
+    google_access_token = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.user.name or self.user.email}"

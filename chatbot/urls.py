@@ -9,4 +9,5 @@ urlpatterns = [
     path("chat_doctors/bot_search/", SearchDoctorsAPI.as_view()),
     path("speclization_list/", SpecializationAPIView.as_view()),
     path("book_appointment/", ChatbotAppointment.as_view()),
+    path("google-calendar/connect/",google_calendar_connect),
 ]

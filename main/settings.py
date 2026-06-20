@@ -30,8 +30,11 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "doctotrrefweb.onrender.com",
+    "9157-2409-40d1-db-1881-c1e8-a31c-4ba2-15ac.ngrok-free.app",
 ]
 
+if DEBUG:
+    OAUTHLIB_INSECURE_TRANSPORT = "1"
 
 
 # Application definition
@@ -177,5 +180,24 @@ SIMPLE_JWT = {
 }
 
 
-GOOGLE_CLIENT_ID = "349715931754-hib9f9k61phbngdh7hqki572mqff9sp0.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET = "http://localhost:8000/google/callback/"
+# GOOGLE_CLIENT_ID = "349715931754-hib9f9k61phbngdh7hqki572mqff9sp0.apps.googleusercontent.com"
+# GOOGLE_CLIENT_SECRET = "http://localhost:8000/google/callback/"
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+
+
+# OAuth / Ngrok
+
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = "None"
+
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = "None"
+SESSION_SAVE_EVERY_REQUEST = True
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]

@@ -11,7 +11,6 @@ from rest_framework.permissions import AllowAny
 from google_auth_oauthlib.flow import Flow
 
 
-# CHATBOT_SERVICE_URL = "http://localhost:8001/api/v1/respond"
 CHATBOT_SERVICE_URL = "https://doctorchatbot.onrender.com/api/v1/respond"
 
 class GlobalChatbotView(APIView):
